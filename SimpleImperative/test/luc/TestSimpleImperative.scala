@@ -12,10 +12,10 @@ class TestSimpleImperative extends FunSuite {
 
   def testCount(description: String, count: Int) = {
     test(description) {
-    	assert(count === Count("1"))
+    
     }
   }
 	
-  testCount("simple", 1)
+  
   
 }
