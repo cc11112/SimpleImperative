@@ -1,0 +1,5 @@
+package luc
+
+object TestFixtures {
+
+}
