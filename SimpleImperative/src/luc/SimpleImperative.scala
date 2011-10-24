@@ -58,6 +58,10 @@ case class Plus(l: Statement, r: Statement) extends BaseStatement(l, r)
 
 case class Minus (l: Statement, r: Statement) extends BaseStatement(l, r)
 
+case class Times (l: Statement, r: Statement) extends BaseStatement(l, r)
+
+case class Div (l: Statement, r: Statement) extends BaseStatement(l, r)
+
 case class Assignment (l: Statement, r: Statement) extends BaseStatement(l, r)
 
 case class Sequence (l: Statement, r: Statement) extends BaseStatement(l, r)
