@@ -5,74 +5,99 @@ package luc
  * supports visitors.
  */
 
-trait Statement {
-  //  def accept(v: StatementVisitor[Result] ) : Result 
-}
-
-abstract class AbstractStatement extends Statement
+trait Statement   
 
 /**
- * The interface for visitors over Statements.  There is one visitation
- * method for each concrete implementation class of Statement.  Note that
- * we no longer distinguish between expressions and statements.  Such a
- * distinction could be made part of the type system.
+ * Something that can be used on the right-hand side of an assignment.
  */
-
-//trait StatementVisitor[Result] {
-//    def visitPlus(s : Plus ) : Result
-//    def visitMinus(s: Minus) : Result
-//    def visitConstant(s: Constant): Result
-//    def visitVariable(s : Variable): Result
-//    def visitSequence(s : Sequence): Result
-//    def visitWhile(s: While): Result
-//    def visitAssignment(s : Assignment): Result
-//    def visitBreakpoint(s : Breakpoint): Result
-//}
-
-trait LValue {
-  def set(v: Int): Unit
-  def get(): Int
+trait RValue[T] {
+  def get: T
 }
 
-class Variable(v: Int) extends AbstractStatement with LValue {
-  var value: Int = v 
-
-  def get(): Int = value
-  def set(value: Int) = this.value = value
-
+/**
+ * Something that can be used on the left-hand side of an assignment.
+ */
+trait LValue[T] extends RValue[T] {
+  def set(value: T): LValue[T]
 }
 
-case class Constant(v: Int) extends Variable(v) {
-  override def set(value: Int) = {}
+/**
+ * A binary statement with two non-null children.
+ */
+abstract class BinaryStatement(left: Statement, right: Statement) extends Statement {
+  require(left != null)
+  require(right != null)
 }
 
-class BaseStatement(l: Statement, r: Statement) extends AbstractStatement{
-  var lt: Statement = l
-  var rt: Statement = r
+/**
+ * Applicative (side-effect-free) statements.
+ */
+case class Constant(value: Int) extends Statement
+case class Plus(left: Statement, right: Statement) extends BinaryStatement(left, right)
+case class Minus(left: Statement, right: Statement) extends BinaryStatement(left, right)
+case class Times(left: Statement, right: Statement) extends BinaryStatement(left, right)
+case class Div(left: Statement, right: Statement) extends BinaryStatement(left, right)
 
-  def getLeft(): Statement = lt
-  def getRight(): Statement = rt
+/**
+ * Imperative statements, that is, those that are interesting because of their
+ * side effects.
+ */
+case class Variable(name: String) extends Statement {
+  require(name != null)
+}
+case class Sequence(statements: Statement*) extends Statement {
+  require(statements != null)
+  require(! statements.contains(null))
+}
+case class While(guard: Statement, body: Statement) extends BinaryStatement(guard, body)
+case class Assignment(left: Statement, right: Statement) extends BinaryStatement(left, right)
+
+
+
+/**
+ * A cell for storing a value.
+ */
+case class Cell[T](var value: T) extends LValue[T] {
+  override def get = value
+  override def set(value: T) = { this.value = value ; this }
 }
 
-case class Plus(l: Statement, r: Statement) extends BaseStatement(l, r)
+/**
+ * A companion object defining a useful Cell instance.
+ */
+object Cell {
+  val NULL = Cell(0)
+}
 
-case class Minus (l: Statement, r: Statement) extends BaseStatement(l, r)
-
-case class Times (l: Statement, r: Statement) extends BaseStatement(l, r)
-
-case class Div (l: Statement, r: Statement) extends BaseStatement(l, r)
-
-case class Assignment (l: Statement, r: Statement) extends BaseStatement(l, r)
-
-case class Sequence (l: Statement, r: Statement) extends BaseStatement(l, r)
-
-case class While (l: Statement, r: Statement) extends BaseStatement(l, r)
-
-
+/**
+ * An interpreter for expressions and statements.
+ */
 object SimpleImperative {
-  def Count(s: String): Int = {
-    1
+
+  type Store = Map[String, LValue[Int]]
+
+  def apply(store: Store)(s: Statement): LValue[Int] = s match {
+    case Constant(value) => Cell(value)
+    case Plus(left, right) => Cell(apply(store)(left).get + apply(store)(right).get)
+    case Minus(left, right) => Cell(apply(store)(left).get - apply(store)(right).get)
+    case Times(left, right) => Cell(apply(store)(left).get * apply(store)(right).get)
+    case Div(left, right) => Cell(apply(store)(left).get / apply(store)(right).get)
+    case Variable(name) => store(name)
+    case Assignment(left, right) => {
+      val lvalue = apply(store)(left)
+      val rvalue = apply(store)(right)
+      lvalue.set(rvalue.get)
+    }
+    case Sequence(statements @ _*) =>
+      statements.foldLeft(Cell.NULL.asInstanceOf[LValue[Int]])((c, s) => apply(store)(s))
+    case While(guard, body) => {
+      var gvalue = apply(store)(guard)
+      while (gvalue.get != 0) {
+        apply(store)(body)
+        gvalue = apply(store)(guard)
+      }
+      Cell.NULL
+    }
   }
 }
-
  

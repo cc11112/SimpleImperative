@@ -4,7 +4,6 @@ object SimpleOperations {
 
   def evaluate(e: Statement): Int = e match {
     case Constant(c) => c
-//    case Variable(c) => c
     case Plus(l, r) => evaluate(l) + evaluate(r)
     case Minus(l, r) => evaluate(l) - evaluate(r)
     case Times(l, r) => evaluate(l) * evaluate(r)

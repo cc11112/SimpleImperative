@@ -9,7 +9,7 @@ import TestFixtures._
 
 @RunWith(classOf[JUnitRunner])
 class TestSimpleOperations extends FunSuite {
-  def testValue(description: String, v: AbstractStatement, result: Int) = {
+  def testValue(description: String, v: Statement, result: Int) = {
     test(description) {
       assert(evaluate(v) === result)
     }
