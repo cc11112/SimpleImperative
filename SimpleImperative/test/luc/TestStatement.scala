@@ -93,6 +93,8 @@ class TestStatement extends FunSuite {
 
   SimpleImperative.apply(store3)(s3)
 
+  println(store3("s"))
+    
   testValue("testcase3", store3("s"), 17)
 
   //test case 4

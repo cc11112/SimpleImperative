@@ -92,6 +92,20 @@ object Cell {
   val NULL = Cell(0)
 }
 
+object GlobalStore {
+  private var store: Store = Map[String, Cell]() 
+  def Reset(): Unit = store = Map[String, Cell]()
+  def Memory: Store = store
+  def New(s: String): Cell = {
+    if (!store.keySet.exists(key => key.equals(s))) {
+      store += (s -> Cell(0))
+    }
+    store(s)
+  }
+  def Count: Int = store.count( s => true )
+  def print: Unit = println(store)
+}
+
 /**
  * An interpreter for expressions and statements.
  */
