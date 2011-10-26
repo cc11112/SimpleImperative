@@ -1,11 +1,13 @@
 package luc
 
+import SimpleImperative.{ Store, Value }
+
 /**
  * The top-level interface for a Statement composite hierarchy that
  * supports visitors.
  */
 
-trait Statement   
+trait Statement
 
 /**
  * Something that can be used on the right-hand side of an assignment.
@@ -45,27 +47,48 @@ case class Div(left: Statement, right: Statement) extends BinaryStatement(left, 
 case class Variable(name: String) extends Statement {
   require(name != null)
 }
+
 case class Sequence(statements: Statement*) extends Statement {
   require(statements != null)
-  require(! statements.contains(null))
+  require(!statements.contains(null))
 }
+
 case class While(guard: Statement, body: Statement) extends BinaryStatement(guard, body)
+
 case class Assignment(left: Statement, right: Statement) extends BinaryStatement(left, right)
 
-
-
 /**
- * A cell for storing a value.
+ * Syntax for statements for creating and using records.
  */
-case class Cell[T](var value: T) extends LValue[T] {
-  override def get = value
-  override def set(value: T) = { this.value = value ; this }
+case class New(clazz: Clazz) extends Statement {
+  require(clazz != null)
+}
+case class Selection(receiver: Statement, field: String) extends Statement {
+  require(receiver != null)
+  require(field != null)
 }
 
+/**
+ * Syntax for record types. Not part of the Statement hierarchy
+ * because they appear only as arguments to New Statements.
+ */
+case class Clazz(fields: String*) {
+  require(fields != null)
+  require(!fields.contains(null))
+}
+
+/**
+ * A cell for storing a value (either a number or an object).
+ */
+case class Cell(var value: Value) {
+  def get = value
+  def set(value: Value) = { this.value = value; this }
+}
 /**
  * A companion object defining a useful Cell instance.
  */
 object Cell {
+  def apply(i: Int): Cell = Cell(Left(i)) // Left -> number, Right -> object
   val NULL = Cell(0)
 }
 
@@ -74,14 +97,27 @@ object Cell {
  */
 object SimpleImperative {
 
-  type Store = Map[String, LValue[Int]]
+  /**
+   * A memory store is a mapping from variable names to storage cells.
+   */
+  type Store = Map[String, Cell]
 
-  def apply(store: Store)(s: Statement): LValue[Int] = s match {
-    case Constant(value) => Cell(value)
-    case Plus(left, right) => Cell(apply(store)(left).get + apply(store)(right).get)
-    case Minus(left, right) => Cell(apply(store)(left).get - apply(store)(right).get)
-    case Times(left, right) => Cell(apply(store)(left).get * apply(store)(right).get)
-    case Div(left, right) => Cell(apply(store)(left).get / apply(store)(right).get)
+  /**
+   * An object (instance) is the same as a memory store.
+   */
+  type Instance = Store
+
+  /**
+   * A run-time value is either a number or an object.
+   */
+  type Value = Either[Int, Instance]
+
+  def apply(store: Store)(s: Statement): Cell = s match {
+    case Constant(value) => Cell(Left(value))
+    case Plus(left, right) => binaryOperation(store, left, right, _ + _)
+    case Minus(left, right) => binaryOperation(store, left, right, _ - _)
+    case Times(left, right) => binaryOperation(store, left, right, _ * _)
+    case Div(left, right) => binaryOperation(store, left, right, _ / _)
     case Variable(name) => store(name)
     case Assignment(left, right) => {
       val lvalue = apply(store)(left)
@@ -89,15 +125,34 @@ object SimpleImperative {
       lvalue.set(rvalue.get)
     }
     case Sequence(statements @ _*) =>
-      statements.foldLeft(Cell.NULL.asInstanceOf[LValue[Int]])((c, s) => apply(store)(s))
+      statements.foldLeft(Cell.NULL)((c, s) => apply(store)(s))
     case While(guard, body) => {
       var gvalue = apply(store)(guard)
-      while (gvalue.get != 0) {
+      while (gvalue.get.isRight || gvalue.get.left.get != 0) {
         apply(store)(body)
         gvalue = apply(store)(guard)
       }
       Cell.NULL
     }
+    case New(Clazz(fields @ _*)) =>
+      // create an object based on the list of field names in the clazz
+      Cell(Right(Map(fields.map(field => (field, Cell(0))): _*)))
+    case Selection(record, field) => {
+      // assume the expression evaluates to a record (.right)
+      // and choose the desired field
+      apply(store)(record).get.right.get.apply(field)
+    }
   }
+
+  def binaryOperation(store: Store, left: Statement, right: Statement, operator: (Int, Int) => Int): Cell = {
+    val l: Int = evaluate(apply(store)(left))
+    val r: Int = evaluate(apply(store)(right))
+    Cell(Left(operator(l, r)))
+  }
+
+  def evaluate(cell: Cell): Int = cell.get.left.get
+  def getCell(store: Store, v: Variable): Cell = store(v.name)
+  def getValue(store: Store, v: Variable): Int = evaluate(store(v.name))
+
 }
  
