@@ -100,7 +100,9 @@ class TestStatement extends FunSuite {
   //test case 4
   val store4 = Map[String, Cell](
     "n" -> Cell(0),
-    "s" -> Cell(0))
+    "s" -> Cell(0),
+    "r" -> Cell(0)
+    )
 
   val s4 = Sequence(
     Assignment(Variable("n"), New(listNode)),
@@ -114,12 +116,12 @@ class TestStatement extends FunSuite {
   
   println(store4("n"))
 
-  var s5 = Sequence(Assignment(Variable("s"), Selection(Variable("n"), "next")))
+  val s5 = Sequence(Assignment(Variable("s"), Selection(Variable("n"), "value")))
+  val s6 = Sequence(Assignment(Variable("r"), Selection(Variable("n"), "next")))
 
-  SimpleImperative.apply(store4)(s5)
-
-  println(store4("s"))
-
-  testValue("testcase4", store4("s"), 12)
   
+  //side effect here
+  
+  testValue("testcase4",SimpleImperative.apply(store4)(s5), 7)
+  testValue("testcase5",SimpleImperative.apply(store4)(s6), 12)
 }
