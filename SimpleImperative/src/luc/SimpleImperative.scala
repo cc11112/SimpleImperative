@@ -3,13 +3,6 @@ package luc
 import SimpleImperative.{ Store, Value }
 
 /**
- * The top-level interface for a Statement composite hierarchy that
- * supports visitors.
- */
-
-trait Statement
-
-/**
  * Something that can be used on the right-hand side of an assignment.
  */
 trait RValue[T] {
@@ -22,6 +15,14 @@ trait RValue[T] {
 trait LValue[T] extends RValue[T] {
   def set(value: T): LValue[T]
 }
+
+/**
+ * The top-level interface for a Statement composite hierarchy that
+ * supports visitors.
+ */
+
+trait Statement
+
 
 /**
  * A binary statement with two non-null children.
@@ -103,7 +104,7 @@ object GlobalStore {
     store(s)
   }
   def Count: Int = store.count( s => true )
-  def print: Unit = println(store)
+  def Watch: Unit = println(store)
 }
 
 /**

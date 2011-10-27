@@ -26,13 +26,13 @@ class TestGlobalStore extends FunSuite {
   cell.set(Left(12))
   testValue("test case 1", cell, 12)
 
-  GlobalStore.Reset()
-  GlobalStore.print
+  GlobalStore.Reset
+  GlobalStore.Watch
 
   testCount("test count", GlobalStore.Count, 0)
   
   GlobalStore.New("s2").set(Left(4))
   GlobalStore.New("s3").set(Left(7))
-  GlobalStore.print
+  GlobalStore.Watch
   testCount("test count 2", GlobalStore.Count, 2)
 }
