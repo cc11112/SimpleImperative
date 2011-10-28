@@ -16,6 +16,12 @@ class TestStatement extends FunSuite {
     }
   }
 
+  def testVaueOfInt(description: String, v: Int, result: Int) = {
+    test(description) {
+      assert(v === result)
+    }
+  }
+
   //test case 1
   val store = Map[String, Cell](
     "x" -> Cell(2),
@@ -99,8 +105,8 @@ class TestStatement extends FunSuite {
 
   //test case 4
   val store4 = Map[String, Cell](
-    "n" -> Cell(0),
-    "s" -> Cell(0))
+    "n" -> Cell(0)
+    )
 
   val s4 = Sequence(
     Assignment(Variable("n"), New(listNode)),
@@ -114,12 +120,9 @@ class TestStatement extends FunSuite {
   
   println(store4("n"))
 
-  var s5 = Sequence(Assignment(Variable("s"), Selection(Variable("n"), "next")))
-
-  SimpleImperative.apply(store4)(s5)
-
-  println(store4("s"))
-
-  testValue("testcase4", store4("s"), 12)
+  val r = store4("n").get.right.get
   
+  testValue("testcase4", r("value"), 7)
+  testValue("testcase5", r("next"), 12)
+
 }

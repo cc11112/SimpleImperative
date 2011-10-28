@@ -135,12 +135,17 @@ object SimpleImperative {
     case Div(left, right) => binaryOperation(store, left, right, _ / _)
     case Variable(name) => store(name)
     case Assignment(left, right) => {
-      val lvalue = apply(store)(left)
       val rvalue = apply(store)(right)
+      val lvalue = apply(store)(left)
       lvalue.set(rvalue.get)
     }
     case Sequence(statements @ _*) =>
-      statements.foldLeft(Cell.NULL)((c, s) => apply(store)(s))
+      //may be c should become left value here??
+      //or only apply to clazz field?
+      //??
+      //I think it is only the left one
+      //such as statements.count = 1
+      statements.foldLeft(Cell.NULL)((c, s) =>apply(store)(s))
     case While(guard, body) => {
       var gvalue = apply(store)(guard)
       while (gvalue.get.isRight || gvalue.get.left.get != 0) {
