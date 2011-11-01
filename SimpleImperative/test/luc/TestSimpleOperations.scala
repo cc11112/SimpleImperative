@@ -1,24 +1,33 @@
-package luc
+package cs.luc
 
 import org.junit.runner.RunWith
 import org.scalatest.junit.JUnitRunner
 import org.scalatest.FunSuite
 
-import SimpleOperations._
-import TestFixtures._
+import ExprParser._
 
 @RunWith(classOf[JUnitRunner])
 class TestSimpleOperations extends FunSuite {
-  def testValue(description: String, v: Statement, result: Int) = {
+  def testValue(description: String, v: Expr, s: String) = {
     test(description) {
-      assert(evaluate(v) === result)
+      val parsedExpr = ExprParser.parseAll(ExprParser.expr, s)
+      assert(parsedExpr.get === v)
     }
   }
 
-  testValue("const", new Constant(1), 1);
-  
-  testValue("plus", new Plus(new Constant(1), new Constant(2)) , 3);
-  
-  testValue("min",  new Minus(new Constant(6), new Constant(4)),  2);
-  
+  val complex1 =
+    Div(
+      Minus(
+        Plus(
+          Constant(1),
+          Constant(2)),
+        Times(
+          Constant(3),
+          Constant(4))),
+      Constant(5));
+
+  val complex1string = "((1 + 2) - (3 * 4)) / 5"
+
+  testValue("test1", complex1, complex1string);
+
 }
