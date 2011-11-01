@@ -35,14 +35,28 @@ class TestSimpleParse extends FunSuite {
 
   val complex1string = "((1 + 2) - (3 * 4)) / 3"
 
-  testParse("test1", complex1, complex1string);
+  testParse("testcase1", complex1, complex1string);
 
   //test case 1
-  val store = Map[String, Cell]("r" -> Cell(0))
+  val store = Map[String, Cell](
+    "r" -> Cell(0),
+    "q" -> Cell(0),
+    "s" -> Cell(0)
+    )
+
   var varR: Variable = new Variable("r");
   var s: Statement = new Assignment(varR, complex1)
 
   SimpleImperative.apply(store)(s)
 
-  testValue("testcase1", SimpleImperative.getCell(store, varR), -3)
+  testValue("testcase2", SimpleImperative.getCell(store, varR), -3)
+
+  val exp2 = new Assignment(new Variable("q"),  Constant(5))
+  val complex1string2 = "var q = 5"
+
+  testParse("testcase3", exp2, complex1string2);
+  var varS: Variable = new Variable("s");
+  SimpleImperative.apply(store)(new Assignment(varS, exp2))
+  testValue("testcase4",  SimpleImperative.getCell(store, varS), 5)
+  
 }
