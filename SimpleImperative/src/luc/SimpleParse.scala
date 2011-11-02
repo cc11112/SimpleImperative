@@ -15,16 +15,18 @@ object StatementParser extends JavaTokenParsers {
     | factor)
   def factor: Parser[Statement] = (
     wholeNumber ^^ { case s => Constant(s.toInt) }
-    | "var" ~ ident ^^ { case _ ~ e  => new Variable(e) }
+    | "var" ~ ident ^^ { case _ ~ e => new Variable(e) }
     | "while" ~ expr ~ expr ^^ { case _ ~ l ~ r => While(l, r) }
-  //  | "struct"  ~ obj  ^^ { case _ ~ e   => Clazz(e) }
+    | "struct" ~ clazz ^^ { case _ ~ e => New(e) }
     | "(" ~ expr ~ ")" ^^ { case _ ~ e ~ _ => e }
-    | "{" ~ expr ~ "}" ^^ { case _ ~ e ~ _  => Sequence(e) }
-    | ident ^^ { case s  => Variable(s) }
-    )
-  def selection: Parser[Any] = stringLiteral ~ "." ~ expr
-//  def obj: Parser[Any] = "{" ~ reqseq(ident, ",") ~ "}" 
-//      "{" ~ repsep(selection, ",") ~ "}" ^^ { case "{" ~ ms ~ "}" => Map() ++ ms }
-  //def member: Parser[Any] = stringLiteral ~ "." ~ expr
+    | "{" ~ expr ~ "}" ^^ { case _ ~ e ~ _ => Sequence(e) }
+    | ident ^^ { case s => Variable(s) })
+  def clazz: Parser[Clazz] = (
+    ident ~ "{" ~ repsep(ident, ",") ~ "}" ^^ { case e ~ _ ~ s ~ _ => new Clazz(s: _*) })
+  def value: Parser[Any] = obj
+  def arr: Parser[Seq[String]] = "(" ~> repsep(stringLiteral, ",") <~ ")"
+  def member: Parser[Any] = stringLiteral | stringLiteral ~ "." ~ value
+  def obj: Parser[Any] = "{" ~ repsep(member, ",") ~ "}"
+
 }
 

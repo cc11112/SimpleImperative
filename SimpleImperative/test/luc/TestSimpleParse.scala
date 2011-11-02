@@ -16,6 +16,14 @@ class TestSimpleParse extends FunSuite {
       assert(parsedExpr.get === v)
     }
   }
+  
+  def testClass(description : String, c: Clazz, s: String) = {
+    test(description) {
+      val parseClazz = StatementParser.parseAll(StatementParser.clazz, s)
+      println(parseClazz)
+      assert(parseClazz.get === c)
+    }
+  }
 
   def testValue(description: String, cell: Cell, result: Int) = {
     test(description) {
@@ -69,4 +77,6 @@ class TestSimpleParse extends FunSuite {
   SimpleImperative.apply(store)(exp2)
   testValue("testcase10", SimpleImperative.getCell(store, varQ), 0)
 
+  testParse("testcase11", New(Clazz("course1", "course2")), "struct StudentSemesterRecord { course1, course2 }" )
+  
 }
