@@ -12,7 +12,7 @@ class TestSimpleImperative extends FunSuite {
 
   def testCount(description: String, count: Int) = {
     test(description) {
-    
+    	assert(0 == count )
     }
   }
 	

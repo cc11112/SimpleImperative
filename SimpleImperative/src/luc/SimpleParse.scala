@@ -5,21 +5,21 @@ import scala.util.parsing.combinator._
 object StatementParser extends JavaTokenParsers {
   def expr: Parser[Statement] = (
     term ~ "+" ~ expr ^^ { case l ~ _ ~ r => Plus(l, r) }
-    | term ~ "-" ~ expr ^^ { case l ~ _ ~ r => Minus(l, r) }
+    | statement ~ "-" ~ statement ^^ { case l ~ _ ~ r => Minus(l, r) }
     | term ~ "=" ~ expr ^^ { case l ~ _ ~ r => Assignment(l, r) }
     | term
-    | factor)
+    | statement)
   def term: Parser[Statement] = (
-    factor ~ "*" ~ factor ^^ { case l ~ _ ~ r => Times(l, r) }
-    | factor ~ "/" ~ factor ^^ { case l ~ _ ~ r => Div(l, r) }
-    | factor)
-  def factor: Parser[Statement] = (
+    statement ~ "*" ~ statement ^^ { case l ~ _ ~ r => Times(l, r) }
+    | statement ~ "/" ~ statement ^^ { case l ~ _ ~ r => Div(l, r) }
+    | statement)
+  def statement: Parser[Statement] = (
     wholeNumber ^^ { case s => Constant(s.toInt) }
     | "var" ~ ident ^^ { case _ ~ e => new Variable(e) }
     | "while" ~ expr ~ expr ^^ { case _ ~ l ~ r => While(l, r) }
     | "struct" ~ clazz ^^ { case _ ~ e => New(e) }
-    | "(" ~ expr ~ ")" ^^ { case _ ~ e ~ _ => e }
-    | "{" ~ expr ~ "}" ^^ { case _ ~ e ~ _ => Sequence(e) }
+    | "(" ~> expr <~ ")" ^^ { case e => e }
+    | "{" ~> repsep(expr, ",") <~ "}" ^^ { case ss => Sequence(ss: _*) }
     | ident ^^ { case s => Variable(s) })
   def clazz: Parser[Clazz] = (
     ident ~ "{" ~ repsep(ident, ",") ~ "}" ^^ { case e ~ _ ~ s ~ _ => new Clazz(s: _*) })
