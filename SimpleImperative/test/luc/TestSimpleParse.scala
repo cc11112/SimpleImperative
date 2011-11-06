@@ -9,6 +9,20 @@ import SimpleImperative._
 
 @RunWith(classOf[JUnitRunner])
 class TestSimpleParse extends FunSuite {
+  def testParseAll(description: String, v: Statement, input: Array[String]) = {
+    test(description) {
+
+      val arr = input.takeWhile(s => s.length() > 0)
+        .map(s => StatementParser.parseAll(StatementParser.expr, s).get).toArray
+
+      val parseStatement: Statement = new Sequence(arr :  _*)
+
+      println(parseStatement)
+
+      assert(parseStatement === v)
+    }
+  }
+
   def testParse(description: String, v: Statement, s: String) = {
     test(description) {
       val parsedExpr = StatementParser.parseAll(StatementParser.expr, s)
@@ -73,14 +87,21 @@ class TestSimpleParse extends FunSuite {
 
   testParse("testcase9", exp2, complex1string2);
 
-  //var varS: Variable = new Variable("s");
   SimpleImperative.apply(store)(exp2)
   testValue("testcase10", SimpleImperative.getCell(store, varQ), 0)
 
-  testParse("testcase11", New(Clazz("course1", "course2")), "struct StudentSemesterRecord { course1, course2 }")
+  testClass("testcase11", Clazz("course1", "course2"), "struct StudentSemesterRecord { course1, course2 }")
 
-  testParse("testcase12", Selection(Variable("n"), "next"), "n.next ")
+  testParse("testcase12", New(Clazz("course1", "course2")), "new struct StudentSemesterRecord { course1, course2 }")
 
-  testParse("testcase13", Assignment(Variable("n"), Selection(Variable("n"), "next")), "n = n.next ")
+  testClass("testcase13", Clazz("value", "next"), "struct ListNode { value, next } \n")
 
+  //test selection
+  testParse("testcase14", Selection(Variable("n"), "next"), "n.next ")
+
+  testParse("testcase15", Assignment(Variable("n"), Selection(Variable("n"), "next")), "n = n.next ")
+
+  //test group
+  val input: Array[String] = "var n\n n = new struct ListNode { value, next } \n n = n.next ".split("\n")
+  testParseAll("testcase16", Sequence(Variable("n"), Assignment(Variable("n"), New(Clazz("value", "next"))), Assignment(Variable("n"), Selection(Variable("n"), "next"))), input)
 }
