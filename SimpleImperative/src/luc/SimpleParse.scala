@@ -20,7 +20,9 @@ object StatementParser extends JavaTokenParsers {
     | "struct" ~ clazz ^^ { case _ ~ e => New(e) }
     | "(" ~> expr <~ ")" ^^ { case e => e }
     | "{" ~> repsep(expr, ",") <~ "}" ^^ { case ss => Sequence(ss: _*) }
-    | ident ^^ { case s => Variable(s) })
+    | ident ~ "." ~ ident ^^ { case r ~ _ ~ f => Selection(Variable(r), f) }
+    | ident ^^ { case s => Variable(s) }
+    )
   def clazz: Parser[Clazz] = (
     ident ~ "{" ~ repsep(ident, ",") ~ "}" ^^ { case e ~ _ ~ s ~ _ => new Clazz(s: _*) })
   def value: Parser[Any] = obj
