@@ -43,7 +43,17 @@ class testValidator extends FunSuite {
 
   testParse("testcase7", s, false);
   
-  
+  //assignment statements themselves cannot be used as l-values (only as r-values)
+  // (n = 2) = v
+  // it is error
+  s = Assignment(Assignment(Variable("n"), Constant(2)), Variable("v"))
 
+  testParse("testcase8", s, false);
+  
+  s = Assignment(Variable("v"), Assignment(Variable("n"), Constant(2)))
+
+  // v = (n = 2)
+  // it is OK
+  testParse("testcase9", s, true);
 }
 
