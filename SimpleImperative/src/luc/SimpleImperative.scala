@@ -95,7 +95,7 @@ object Cell {
 
 object GlobalStore {
   private var store: Store = Map[String, Cell]() 
-  def Reset(): Unit = store = Map[String, Cell]()
+  def Reset: Unit = store = Map[String, Cell]()
   def Memory: Store = store
   def New(s: String): Cell = {
     if (!store.keySet.exists(key => key.equals(s))) {
