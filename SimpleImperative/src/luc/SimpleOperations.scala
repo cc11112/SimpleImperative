@@ -9,7 +9,10 @@ object mainSimple {
   var input = new ListBuffer[String]
 
   def Repl(s: String): Unit = s match {
-    case "quit;" => System.exit(0)
+    case "quit;" => {
+       println("exit.")
+       System.exit(0)
+    }
     case "help;" => println("ouput usage text here")
     case "dump;" => GlobalStore.Watch
     case "clear;" => GlobalStore.Reset
