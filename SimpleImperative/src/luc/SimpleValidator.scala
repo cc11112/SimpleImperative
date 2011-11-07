@@ -2,7 +2,7 @@ package luc
 
 object SimpleValidator {
   def Check(s: Statement): Boolean = s match {
-    case w: While => w.guard match {
+    case While(guard,body ) => guard match {
       case Constant(c) => true
       case Variable(v) => true
       case Assignment(left, right) => Check(right)
@@ -10,7 +10,7 @@ object SimpleValidator {
       case Sequence(statements @ _*) => Check(statements.last)
       case _ => false
     }
-    case a: Assignment => a.left match {
+    case Assignment(left, right) => left match {
        case Variable(v) => true
        case Sequence(statements @ _*) => Check(statements.last)
        case Assignment(left, right) => Left(left).isRight 

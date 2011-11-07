@@ -58,7 +58,7 @@ class TestSimpleParse extends FunSuite {
 
   val complex1string = "((1 + 2) - (3 * 4)) / 3"
 
-  testParse("testcase1", complex1, complex1string);
+  testParse("testcase0", complex1, complex1string);
 
   //test case 1
   val store = Map[String, Cell](
@@ -71,15 +71,19 @@ class TestSimpleParse extends FunSuite {
 
   SimpleImperative.apply(store)(s)
 
-  testValue("testcase2", SimpleImperative.getCell(store, varR), -3)
+  testValue("testcase1", SimpleImperative.getCell(store, varR), -3)
 
   var varQ = new Variable("q")
-  testParse("testcase3", varQ, "q")
-  testParse("testcase4", varQ, "(q)")
+  testParse("testcase2", varQ, "q")
+  testParse("testcase3", varQ, "(q)")
 
-  testParse("testcase5", Sequence(Constant(1)), "{ 1 }")
-  testParse("testcase6", Sequence(Sequence(Variable("q"))), "{ {q} }")
-  testParse("testcase7", Assignment(Variable("s"), Minus(Variable("q"), Constant(1))), "s = q - 1 ")
+  testParse("testcase4", Sequence(Constant(1)), "{ 1 }")
+  testParse("testcase5", Sequence(Sequence(Variable("q"))), "{ {q} }")
+  testParse("testcase6", Assignment(Variable("s"), Minus(Variable("q"), Constant(1))), "s = q - 1 ")
+  
+  //test case for n = n +1
+  testParse("testcase7", Assignment(Variable("n"), Plus(Variable("n"), Constant(1))), "n = n + 1 ")
+  
   testParse("testcase8", Times(Plus(Variable("s"), Constant(1)), Constant(4)), " (s + 1) * 4")
 
   val exp2 = While(varQ, Sequence(Assignment(varQ, Minus(varQ, Constant(1)))))

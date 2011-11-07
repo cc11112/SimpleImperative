@@ -23,7 +23,6 @@ trait LValue[T] extends RValue[T] {
 
 trait Statement
 
-
 /**
  * A binary statement with two non-null children.
  */
@@ -94,17 +93,27 @@ object Cell {
 }
 
 object GlobalStore {
-  private var store: Store = Map[String, Cell]() 
-  def Reset: Unit = store = Map[String, Cell]()
+  private var store: Store = Map[String, Cell]()
+  def Reset(): Unit = store = Map[String, Cell]()
   def Memory: Store = store
   def New(s: String): Cell = {
     if (!store.keySet.exists(key => key.equals(s))) {
       store += (s -> Cell(0))
+      println("new memory for " + s )
     }
     store(s)
   }
-  def Count: Int = store.count( s => true )
-  def Watch: Unit = println(store)
+  def Count(): Int = store.count(s => true)
+  def Watch(): Unit = println(store)
+  def Allocation(s: Statement): Cell = s match {
+    case Variable(name) => New(name)
+    case Assignment(left, right) => Allocation(left)
+    case Sequence(statements @ _*) => {
+      statements.map(e => Allocation(e))
+      null
+    }
+    case _ => null
+  }
 }
 
 /**
@@ -128,7 +137,9 @@ object SimpleImperative {
   type Value = Either[Int, Instance]
 
   def apply(store: Store)(s: Statement): Cell = s match {
-    case Constant(value) => Cell(Left(value))
+    case Constant(value) => {
+      Cell(Left(value))
+    }
     case Plus(left, right) => binaryOperation(store, left, right, _ + _)
     case Minus(left, right) => binaryOperation(store, left, right, _ - _)
     case Times(left, right) => binaryOperation(store, left, right, _ * _)
@@ -145,7 +156,7 @@ object SimpleImperative {
       //??
       //I think it is only the left one
       //such as statements.count = 1
-      statements.foldLeft(Cell.NULL)((c, s) =>apply(store)(s))
+      statements.foldLeft(Cell.NULL)((c, s) => apply(store)(s))
     case While(guard, body) => {
       var gvalue = apply(store)(guard)
       while (gvalue.get.isRight || gvalue.get.left.get != 0) {

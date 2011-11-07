@@ -15,7 +15,9 @@ object mainSimple {
     case "clear;" => GlobalStore.Reset
     case _ => {
       if (s.endsWith(";")) {
-        input += s.replace(';', ' ')
+        val line = s.replace(';', ' ').trim()
+        if (line.length() > 0)
+          input += (line + "\n")
         Execute()
         input = new ListBuffer[String]
       } else {
@@ -25,6 +27,9 @@ object mainSimple {
   }
 
   def Execute() = {
+	println("Now Execute:")
+    for (s <- input)
+      println(s)
 
     val arr = input.takeWhile(s => s.length() > 0)
       .map(s => StatementParser.parseAll(StatementParser.expr, s).get).toArray
@@ -33,6 +38,10 @@ object mainSimple {
 
     if (SimpleValidator.Check(parseStatement)) {
       println(parseStatement)
+
+      GlobalStore.Allocation(parseStatement)
+
+      //GlobalStore.Watch
       SimpleImperative.apply(GlobalStore.Memory)(parseStatement)
     } else {
       System.err.println("Valid Check error!")
@@ -42,7 +51,7 @@ object mainSimple {
 
   def main(args: Array[String]) {
     GlobalStore.Watch
-    Iterator.continually(Console.readLine).foreach(line => Repl(line))
+    Iterator.continually(Console.readLine).foreach(line => Repl(line.trim()))
   }
 
 }
