@@ -15,31 +15,31 @@ class testValidator extends FunSuite {
     }
   }
 
-  var s: Statement = new Assignment(Variable("n"), Constant(1))
+  var s: Statement = Assignment(Variable("n"), Constant(1))
 
   testParse("testcase1", s, true);
 
-  s = new Assignment(Constant(1), Variable("n"))
+  s = Assignment(Constant(1), Variable("n"))
 
   testParse("testcase2", s, false);
 
-  s = new While(Variable("n"), s)
+  s = While(Variable("n"), s)
 
   testParse("testcase3", s, true);
 
-  s = new While(Constant(1), s)
+  s = While(Constant(1), s)
 
   testParse("testcase4", s, true);
 
-  s = new While(Selection(Variable("n"), "next"), s)
+  s = While(Selection(Variable("n"), "next"), s)
 
   testParse("testcase5", s, true);
 
-  s = new While(Assignment(Variable("n"), Constant(1)), s)
+  s = While(Assignment(Variable("n"), Constant(1)), s)
 
   testParse("testcase6", s, true);
 
-  s = new While(While(Variable("n"), Constant(1)), s)
+  s = While(While(Variable("n"), Constant(1)), s)
 
   testParse("testcase7", s, false);
   
@@ -55,5 +55,7 @@ class testValidator extends FunSuite {
   // v = (n = 2)
   // it is OK
   testParse("testcase9", s, true);
+  
+  testParse("testcase10", Sequence(Assignment(Constant(1), Variable("v"))), false);
 }
 
