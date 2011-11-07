@@ -78,7 +78,7 @@ class TestSimpleParse extends FunSuite {
   testParse("testcase3", varQ, "(q)")
 
   testParse("testcase4", Sequence(Constant(1)), "{ 1 }")
-  testParse("testcase5", Sequence(Sequence(Variable("q"))), "{ {q} }")
+  testParse("testcase5", Sequence(Sequence(Variable("q"))), "{\n {q} }")
   testParse("testcase6", Assignment(Variable("s"), Minus(Variable("q"), Constant(1))), "s = q - 1 ")
   
   //test case for n = n +1

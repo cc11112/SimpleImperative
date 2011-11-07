@@ -5,8 +5,8 @@ import scala.util.parsing.combinator._
 object StatementParser extends JavaTokenParsers {
   def expr: Parser[Statement] = (
     term ~ "+" ~ expr ^^ { case l ~ _ ~ r => Plus(l, r) }
-    | statement ~ "-" ~ statement ^^ { case l ~ _ ~ r => Minus(l, r) }
-    | term ~ "=" ~ expr ^^ { case l ~ _ ~ r => Assignment(l, r) }
+    | statement ~ "-" ~ expr ^^ { case l ~ _ ~ r => Minus(l, r) }
+    | statement ~ "=" ~ expr ^^ { case l ~ _ ~ r => Assignment(l, r) }
     | term
     | statement)
   def term: Parser[Statement] = (
@@ -25,10 +25,10 @@ object StatementParser extends JavaTokenParsers {
     )
   def clazz: Parser[Clazz] = (
    "struct" ~ ident ~ "{" ~ repsep(ident, ",") ~ "}" ^^ { case _ ~ e ~ _ ~ s ~ _ => Clazz(s: _*) })
-  def value: Parser[Any] = obj
-  def arr: Parser[Seq[String]] = "(" ~> repsep(stringLiteral, ",") <~ ")"
-  def member: Parser[Any] = stringLiteral | stringLiteral ~ "." ~ value
-  def obj: Parser[Any] = "{" ~ repsep(member, ",") ~ "}"
+//  def value: Parser[Any] = obj
+//  def arr: Parser[Seq[String]] = "(" ~> repsep(stringLiteral, ",") <~ ")"
+//  def member: Parser[Any] = stringLiteral | stringLiteral ~ "." ~ value
+//  def obj: Parser[Any] = "{" ~ repsep(member, ",") ~ "}"
 
 }
 
