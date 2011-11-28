@@ -16,6 +16,12 @@ class TestStatement extends FunSuite {
     }
   }
 
+  def testParse(description: String, v: Statement, b: Boolean) = {
+    test(description) {
+      assert(SimpleValidator.Check(v) == b)
+    }
+  }
+
   def testVaueOfInt(description: String, v: Int, result: Int) = {
     test(description) {
       assert(v === result)
@@ -39,9 +45,11 @@ class TestStatement extends FunSuite {
         new Assignment(varR, new Plus(varR, varX)),
         new Assignment(varY, new Minus(varY, one))));
 
+  testParse("testcase 1 for Validator", s, true);
+
   SimpleImperative.apply(store)(s)
 
-  testValue("testcase1", SimpleImperative.getCell(store, varR), 6)
+  testValue("testcase 1 for Value", SimpleImperative.getCell(store, varR), 6)
 
   //test case 2
   val studentCourseRecord = Clazz("firstExamScore", "secondExamScore", "totalScore")
@@ -64,9 +72,11 @@ class TestStatement extends FunSuite {
       Assignment(Variable("q"), Selection(Selection(Variable("r"), "course2"), "totalScore")),
       Assignment(Selection(Selection(Variable("r"), "course1"), "firstExamScore"), Constant(45)))
 
+  testParse("testcase 2 for Validator", s2, true);
+
   SimpleImperative.apply(store2)(s2)
 
-  testValue("testcase2", store2("q"), 60)
+  testValue("testcase2 for value", store2("q"), 60)
 
   //test case 3
   val store3 = Map[String, Cell](
@@ -97,16 +107,17 @@ class TestStatement extends FunSuite {
           Assignment(Variable("s"), Plus(Variable("s"), Selection(Variable("n"), "value"))),
           Assignment(Variable("n"), Selection(Variable("n"), "next")))))
 
+  testParse("testcase 3 for Validator", s3, true);
+
   SimpleImperative.apply(store3)(s3)
 
   println(store3("s"))
-    
-  testValue("testcase3", store3("s"), 17)
+
+  testValue("testcase3 for value", store3("s"), 17)
 
   //test case 4
   val store4 = Map[String, Cell](
-    "n" -> Cell(0)
-    )
+    "n" -> Cell(0))
 
   val s4 = Sequence(
     Assignment(Variable("n"), New(listNode)),
@@ -116,12 +127,14 @@ class TestStatement extends FunSuite {
       Assignment(Selection(Variable("n"), "value"), Constant(7)),
       Selection(Variable("n"), "next")), Constant(12)))
 
+  testParse("testcase 4 for Validator", s4, true);
+
   SimpleImperative.apply(store4)(s4)
-  
+
   println(store4("n"))
 
   val r = store4("n").get.right.get
-  
+
   testValue("testcase4", r("value"), 7)
   testValue("testcase5", r("next"), 12)
 

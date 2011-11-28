@@ -94,20 +94,53 @@ object Cell {
 
 object GlobalStore {
   private var store: Store = Map[String, Cell]()
-  def Reset(): Unit = store = Map[String, Cell]()
+  private var typedecl = Map[String, Clazz]()
+  def Reset(): Unit = {
+    store = Map[String, Cell]()
+    typedecl = Map[String, Clazz]()
+  }
   def Memory: Store = store
   def New(s: String): Cell = {
     if (!store.keySet.exists(key => key.equals(s))) {
       store += (s -> Cell(0))
-      println("new memory for " + s )
+      println("allocate memory for " + s)
     }
     store(s)
   }
+  def PutClass(s: String, c: Clazz): Clazz = {
+    if (typedecl.keySet.exists(key => key.equals(s))) {
+      println("already exits type name " + s )
+    }
+    else{
+      typedecl += (s -> c)
+      println("created type name " + s + " for " + c)
+    }
+    c
+  }
+  def GetClass(s: String): Clazz = {
+      if (typedecl.keySet.exists(key => key.equals(s))) {
+    	  typedecl(s)
+      }
+      else {
+        null
+      }
+  }
   def Count(): Int = store.count(s => true)
-  def Watch(): Unit = println(store)
+  def Watch(): Unit = {
+    println("Defined classes:")
+    println(typedecl)
+    println("Memory variables:")
+    println(store)
+  }
   def Allocation(s: Statement): Cell = s match {
     case Variable(name) => New(name)
-    case Assignment(left, right) => Allocation(left)
+    case Plus(left, right) => Allocation(left); Allocation(right)
+    case Minus(left, right) => Allocation(left); Allocation(right)
+    case Times(left, right) => Allocation(left); Allocation(right)
+    case Div(left, right) => Allocation(left); Allocation(right)
+    case Assignment(left, right) => Allocation(left); Allocation(right)
+    case Selection(r, f) => Allocation(r)
+    case While(guard, body) => Allocation(guard); Allocation(body)
     case Sequence(statements @ _*) => {
       statements.map(e => Allocation(e))
       null

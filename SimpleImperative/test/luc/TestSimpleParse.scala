@@ -15,7 +15,7 @@ class TestSimpleParse extends FunSuite {
       val arr = input.takeWhile(s => s.length() > 0)
         .map(s => StatementParser.parseAll(StatementParser.expr, s).get).toArray
 
-      val parseStatement: Statement = new Sequence(arr :  _*)
+      val parseStatement: Statement = new Sequence(arr: _*)
 
       println(parseStatement)
 
@@ -80,10 +80,10 @@ class TestSimpleParse extends FunSuite {
   testParse("testcase4", Sequence(Constant(1)), "{ 1 }")
   testParse("testcase5", Sequence(Sequence(Variable("q"))), "{\n {q} }")
   testParse("testcase6", Assignment(Variable("s"), Minus(Variable("q"), Constant(1))), "s = q - 1 ")
-  
+
   //test case for n = n +1
   testParse("testcase7", Assignment(Variable("n"), Plus(Variable("n"), Constant(1))), "n = n + 1 ")
-  
+
   testParse("testcase8", Times(Plus(Variable("s"), Constant(1)), Constant(4)), " (s + 1) * 4")
 
   val exp2 = While(varQ, Sequence(Assignment(varQ, Minus(varQ, Constant(1)))))
@@ -98,14 +98,18 @@ class TestSimpleParse extends FunSuite {
 
   testParse("testcase12", New(Clazz("course1", "course2")), "new struct StudentSemesterRecord { course1, course2 }")
 
-  testClass("testcase13", Clazz("value", "next"), "struct ListNode { value, next } \n")
-
+  testClass("testcase13", Clazz("value", "next"), "struct ListNode { value, next } ")
+  
+  
   //test selection
-  testParse("testcase14", Selection(Variable("n"), "next"), "n.next ")
+  testParse("testcase15", Selection(Variable("n"), "next"), "n.next ")
 
-  testParse("testcase15", Assignment(Variable("n"), Selection(Variable("n"), "next")), "n = n.next ")
+  testParse("testcase16", Assignment(Variable("n"), Selection(Variable("n"), "next")), "n = n.next ")
 
   //test group
   val input: Array[String] = "var n\n n = new struct ListNode { value, next } \n n = n.next ".split("\n")
-  testParseAll("testcase16", Sequence(Variable("n"), Assignment(Variable("n"), New(Clazz("value", "next"))), Assignment(Variable("n"), Selection(Variable("n"), "next"))), input)
+  testParseAll("testcase17", Sequence(Variable("n"), Assignment(Variable("n"), New(Clazz("value", "next"))), Assignment(Variable("n"), Selection(Variable("n"), "next"))), input)
+
+  testParse("testcase18", Assignment(Variable("n"), New(Clazz("value", "next"))), "var n = new ListNode")
+
 }
