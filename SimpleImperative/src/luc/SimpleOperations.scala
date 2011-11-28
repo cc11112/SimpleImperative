@@ -73,6 +73,7 @@ object mainSimple {
   }
 
   def main(args: Array[String]) {
+    
     GlobalStore.Watch
     Iterator.continually(Console.readLine).foreach(line => Repl(line.trim()))
   }
